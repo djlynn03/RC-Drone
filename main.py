@@ -1,5 +1,6 @@
 import pygame
 from calculations import angle
+
 pygame.init()
 joysticks = []
 clock = pygame.time.Clock()
