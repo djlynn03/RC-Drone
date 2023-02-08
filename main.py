@@ -42,8 +42,8 @@ while keepPlaying:
             if event.axis == 3:
                 joystick2_pos[1] = int(event.value * 100)
             print(joystick1_pos, joystick2_pos, angle(joystick2_pos[0], joystick2_pos[1]))
-                
-                
+
+
 '''
 left stick- rotate drone
 right stick- move drone

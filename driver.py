@@ -1,40 +1,44 @@
-import os
 import time
 import pigpio
 
+# Electronic Speed Controller constants
+MAX_ECS_SPEED = 2000
+MIN_ECS_SPEED = 700
+ESC_PINS = [4, 17, 27, 22]
+
 class Driver:
     def __init__(self):
-        self.ESC_PINS = [4, 17, 27, 22]
-        self.max_value = 2000
-        self.min_value = 700
-        self.start_stop(self.ESC_PINS)
-        self.pi = pigpio.pi()
+        self.Pi = pigpio.pi()
 
-    def set_all(self, val):
-        for e in self.ESC_PINS:
-            self.pi.set_servo_pulsewidth(e, val)
+    def _set_all_pins(self, val):
+        for pin in ESC_PINS:
+            self.Pi.set_servo_pulsewidth(pin, val)
 
-    def start_stop(self):
-        self.set_all(0)
-
+    # Done once at startup
     def calibrate(self):
-        self.start_stop()
-        print("Disconnect the battery and press Enter")
-        inp = input()
-        if inp == '':
-            self.set_all(self.max_value)
-            print("Connect the battery and press Enter")
-            inp = input()
-            if inp == '':
-                self.set_all(self.min_value)
-                time.sleep(10)
-                self.set_all(0)
-                time.sleep(2)
-                self.set_all(self.min_value)
-                return
-        print("Calibration failed")
+        self._set_all_pins(0)
 
-    def drive(self):
-        speed = 1500
+        # TODO turn battery off here
+        # Pi would output one to a transistor to connect/disconnect the battery
+        self._set_all_pins(MAX_ECS_SPEED)
+
+        # TODO turn battery on here
+        self._set_all_pins(MIN_ECS_SPEED)
+        time.sleep(10)
+        self._set_all_pins(0)
+        time.sleep(2)
+        self._set_all_pins(MIN_ECS_SPEED)
+
+    # Drives pairs of motors together
+    def drive(self, val):
+        pass
+
+    def hover(self, val):
+        pass
 
 driver = Driver()
+
+# Things to work on
+# Start up sequence -> drone on, calibrate, hover
+# Solder all the components
+
