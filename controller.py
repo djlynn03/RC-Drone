@@ -1,74 +1,68 @@
 import pygame
-import math
+from collections import defaultdict
 
-def angle(x, y):
-    if x == 0:
-        return 0
-    return math.degrees(math.atan(y / x))
+from Utils.calculations import *
 
 pygame.init()
+
 joysticks = []
-clock = pygame.time.Clock()
-keepPlaying = True
-
-keymap = {
-    0: "A",
-    1: "B",
-    2: "X",
-    3: "Y",
-}
-
-# typemap = {
-#     1538: "Hat",
-#     1539: "ButtonDown",
-#     1540: "ButtonUp",
-#     1536: "JoystickMotion"
-# }
-
-JoystickMotion = 1536
-
 for i in range(0, pygame.joystick.get_count()):
     joysticks.append(pygame.joystick.Joystick(i))
-    joysticks[-1].init()
+    joysticks[i].init()
 
-joystick1_pos = [0,0] # x,y
-joystick2_pos = [0,0] # up/left is negative, down/right is positive
+clock = pygame.time.Clock()
 
-threshold = 0.05
+stick1 = [0, 0] # x,y
+stick2 = [0, 0] # up/left is negative, down/right is positive
+activationThreshold = 0.05
+def handleJoyStickMotion(event):
+    if event.axis == 0:
+        stick1[0] = event.value
+    if event.axis == 1:
+        stick1[1] = event.value
+    if event.axis == 2:
+        stick2[0] = event.value
+    if event.axis == 3:
+        stick2[1] = event.value
+    if (abs(stick1[0]) < activationThreshold > abs(stick1[1])):
+        stick1[0] = stick1[1] = 0
+    if (abs(stick2[0]) < activationThreshold > abs(stick2[1])):
+        stick2[0] = stick2[1] = 0
+    print(stick1, stick2, angleDegrees(stick2[0], stick2[1]), magnitude(stick2[0], stick2[1]))
 
-while keepPlaying:
-    clock.tick(10)
-    for event in pygame.event.get():
-        if event.type == JoystickMotion:
-            if event.axis == 0:
-                joystick1_pos[0] = event.value
-            if event.axis == 1:
-                joystick1_pos[1] = event.value
-            if event.axis == 2:
-                joystick2_pos[0] = event.value
-            if event.axis == 3:
-                joystick2_pos[1] = event.value
-            if (abs(joystick1_pos[0]) < threshold > abs(joystick1_pos[1])):
-                joystick1_pos[0] = joystick1_pos[1] = 0
-            if (abs(joystick2_pos[0]) < threshold > abs(joystick2_pos[1])):
-                joystick2_pos[0] = joystick2_pos[1] = 0
+def handleButtonPress(event):
+    if event.button == 0:
+        print("Button \"A\" Pressed")
+    # elif event.button == 1:
+    #     print("Button \"B\" Pressed")
+    # elif event.button == 2:
+    #     print("Button \"X\" Pressed")
+    # elif event.button == 3:
+    #     print("Button \"Y\" Pressed")
+    elif event.button == 4:
+        print("Button \"LB\" Pressed")
+    elif event.button == 5:
+        print("Button \"RB\" Pressed")
+    # elif event.button == 6:
+    #     print("Button \"Back\" Pressed")
+    # elif event.button == 7:
+    #     print("Button \"Start\" Pressed")
+    # elif event.button == 8:
+    #     print("Button \"Left Stick\" Pressed")
+    # elif event.button == 9:
+    #     print("Button \"Right Stick\" Pressed")
+    else:
+        print(f"Button {event.button} Pressed")
 
-            print(joystick1_pos, joystick2_pos, angle(joystick2_pos[0], joystick2_pos[1]))
-                
-                
-'''
-left stick- rotate drone
-right stick- move drone
+def skipEvent(event):
+    pass
 
-left trigger- move down
-right trigger- move up
+def run():
+    eventHandlers = defaultdict(lambda: skipEvent)
+    eventHandlers[pygame.JOYAXISMOTION] = handleJoyStickMotion
+    eventHandlers[pygame.JOYBUTTONDOWN] = handleButtonPress
 
-A- take picture
-
-
-startup sequence to calibrate motors
-    if uneven while lifting off, add constant to one motor for rest of session
-    lift to a certain height
-    
-https://ozeki.hu/p_3002-how-to-setup-a-dc-motor-on-raspberry-pi.html#:~:text=Raspberry%20PI%20DC%20Motor%20code&text=You%20can%20set%20DC%20motor,0%25%20the%20motor%20will%20stop.
-'''
+    while True:
+        clock.tick(60)
+        for event in pygame.event.get():
+            eventHandlers[event.type](event)
