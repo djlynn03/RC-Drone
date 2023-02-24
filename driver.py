@@ -7,12 +7,13 @@ from copy import deepcopy
 # Electronic Speed Controller constants
 MAX_ECS_SPEED = 2000
 MIN_ECS_SPEED = 700
-EQUILIBRIUM_SPEED =
+EQUILIBRIUM_SPEED = "IMPLEMENT ME"
 # Front left - 4
 # Front right - 17
 # Back left - 22
 # Back right - 27
 ESC_PINS = [4, 17, 27, 22]
+
 
 class Driver:
     def __init__(self):
@@ -66,18 +67,20 @@ class Driver:
 
     # Done once at startup
     def calibrate(self):
-        self._set_all_pins(0)
+        self.setAllMotors(0)
 
         # TODO turn battery off here
         # Pi would output one to a transistor to connect/disconnect the battery
-        self._set_all_pins(MAX_ECS_SPEED)
-
+        input("disconnect battery and press enter")
+        self.setAllMotors(MAX_ECS_SPEED)
+        time.sleep(1)
+        input("connect battery and press enter")
         # TODO turn battery on here
-        self._set_all_pins(MIN_ECS_SPEED)
+        self.setAllMotors(MIN_ECS_SPEED)
         time.sleep(10)
-        self._set_all_pins(0)
+        self.setAllMotors(0)
         time.sleep(2)
-        self._set_all_pins(MIN_ECS_SPEED)
+        self.setAllMotors(MIN_ECS_SPEED)
 
     # Drives pairs of motors together
     def manual_drive(self):
@@ -157,3 +160,6 @@ class Driver:
 # Things to work on
 # Start up sequence -> drone on, calibrate, hover
 # Solder all the components
+if __name__ == "__main__":
+    d = Driver()
+    d.calibrate()

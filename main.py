@@ -1,4 +1,12 @@
 import controller
+import os
+import time
+import pygame
+pygame.init()
+
+os.system("sudo pigpiod")
+print("initializing pigpio")
+time.sleep(2)
 
 controller.run()
 

@@ -1,3 +1,6 @@
+import os
+os.environ['SDL_VIDEODRIVER'] = 'dummy'
+
 import pygame
 from collections import defaultdict
 
@@ -6,6 +9,11 @@ from driver import Driver
 
 pygame.init()
 driver = Driver()
+
+import pygame.display
+pygame.display.init()
+screen = pygame.display.set_mode((1,1))
+
 
 joysticks = []
 for i in range(0, pygame.joystick.get_count()):
