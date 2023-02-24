@@ -2,8 +2,10 @@ import pygame
 from collections import defaultdict
 
 from Utils.calculations import *
+from driver import Driver
 
 pygame.init()
+driver = Driver()
 
 joysticks = []
 for i in range(0, pygame.joystick.get_count()):
@@ -14,6 +16,7 @@ clock = pygame.time.Clock()
 
 stick1 = [0, 0] # x,y
 stick2 = [0, 0] # up/left is negative, down/right is positive
+
 activationThreshold = 0.05
 def handleJoyStickMotion(event):
     if event.axis == 0:
@@ -29,10 +32,12 @@ def handleJoyStickMotion(event):
     if (abs(stick2[0]) < activationThreshold > abs(stick2[1])):
         stick2[0] = stick2[1] = 0
     print(stick1, stick2, angleDegrees(stick2[0], stick2[1]), magnitude(stick2[0], stick2[1]))
+    driver.rotate(stick1[0], stick1[1])
 
 def handleButtonPress(event):
     if event.button == 0:
         print("Button \"A\" Pressed")
+        "Camera Function"
     # elif event.button == 1:
     #     print("Button \"B\" Pressed")
     # elif event.button == 2:
@@ -41,8 +46,10 @@ def handleButtonPress(event):
     #     print("Button \"Y\" Pressed")
     elif event.button == 4:
         print("Button \"LB\" Pressed")
+        driver.descend()
     elif event.button == 5:
         print("Button \"RB\" Pressed")
+        driver.ascend()
     # elif event.button == 6:
     #     print("Button \"Back\" Pressed")
     # elif event.button == 7:
@@ -54,6 +61,16 @@ def handleButtonPress(event):
     else:
         print(f"Button {event.button} Pressed")
 
+def handleButtonLift(event):
+    if event.button == 4:
+        print("Button \"LB\" Lifted")
+        driver.ascend()
+    elif event.button == 5:
+        print("Button \"RB\" Lifted")
+        driver.descend()
+    else:
+        print(f"Button {event.button} Lifted")
+
 def skipEvent(event):
     pass
 
@@ -61,6 +78,7 @@ def run():
     eventHandlers = defaultdict(lambda: skipEvent)
     eventHandlers[pygame.JOYAXISMOTION] = handleJoyStickMotion
     eventHandlers[pygame.JOYBUTTONDOWN] = handleButtonPress
+    eventHandlers[pygame.JOYBUTTONUP] = handleButtonLift
 
     while True:
         clock.tick(60)
