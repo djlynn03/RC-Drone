@@ -19,6 +19,8 @@ stick2 = [0, 0] # up/left is negative, down/right is positive
 
 activationThreshold = 0.05
 def handleJoyStickMotion(event):
+    leftNull = False
+    rightNull = False
     if event.axis == 0:
         stick1[0] = event.value
     if event.axis == 1:
@@ -27,12 +29,24 @@ def handleJoyStickMotion(event):
         stick2[0] = event.value
     if event.axis == 3:
         stick2[1] = event.value
+
     if (abs(stick1[0]) < activationThreshold > abs(stick1[1])):
         stick1[0] = stick1[1] = 0
+        leftNull = True
+    else:
+        leftNull = False
+
     if (abs(stick2[0]) < activationThreshold > abs(stick2[1])):
         stick2[0] = stick2[1] = 0
-    print(stick1, stick2, angleDegrees(stick2[0], stick2[1]), magnitude(stick2[0], stick2[1]))
-    driver.rotate(stick1[0], stick1[1])
+        rightNull = True
+    else:
+        rightNull = False
+
+    if leftNull and rightNull:
+        driver.hover()
+    else:
+        driver.rotate(stick1[0], stick1[1])
+        driver.move(stick2[0], stick2[1])
 
 def handleButtonPress(event):
     if event.button == 0:

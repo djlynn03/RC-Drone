@@ -19,9 +19,9 @@ class Driver:
         self.Pi = pigpio.pi()
         # Front left, front right, back left, back right
         self.motorSpeeds = [MIN_ECS_SPEED] * 4
-        self.motorReferenceSpeeds = [MIN_ECS_SPEED] * 4
         self.isRotating = False
         self.isMoving = False
+        self.currentDirection = "None"
 
     def boundSpeed(self, speed):
         return max(min(speed, MAX_ECS_SPEED), MIN_ECS_SPEED)
@@ -108,40 +108,51 @@ class Driver:
     def rotate(self, leftStickX, leftStickY):
         if leftStickX == leftStickY == 0:
             self.isRotating = False
-            self.motorSpeeds = deepcopy(self.motorReferenceSpeeds)
+            self.setAllMotors(EQUILIBRIUM_SPEED)
         elif not self.isMoving:
             if not self.isRotating:
                 self.isRotating = True
-                self.motorReferenceSpeeds = deepcopy(self.motorSpeeds)
                 angle = angleDegrees(leftStickX, leftStickY)
-            if angle < 90 or angle > 270:
-                # Turn right
-                self.setLeftDiagonal(self.motorReferenceSpeeds[2] + 10)
-            else:
-                # Turn left
-                self.setRightDiagonal(self.motorReferenceSpeeds[1] + 10)
+                if angle < 90 or angle > 270:
+                    # Turn right
+                    self.setLeftDiagonal(EQUILIBRIUM_SPEED + 10)
+                else:
+                    # Turn left
+                    self.setRightDiagonal(EQUILIBRIUM_SPEED + 10)
 
     def move(self, rightStickX, rightStickY):
         if rightStickX == rightStickY == 0:
             self.isMoving = False
-            self.motorSpeeds = deepcopy(self.motorReferenceSpeeds)
+            self.currentDirection = "None"
+            self.setAllMotors(EQUILIBRIUM_SPEED)
         elif not self.isRotating:
             if not self.isMoving:
                 self.isMoving = True
-                self.motorReferenceSpeeds = deepcopy(self.motorSpeeds)
                 angle = angleDegrees(rightStickX, rightStickY)
-            if angle > 45 and angle < 135:
-                # Move forward
-                self.setBackMotors(self.motorReferenceSpeeds[2] + 10)
-            elif angle > 225 and angle < 315:
-                # Move backward
-                self.setFrontMotors(self.motorReferenceSpeeds[0] + 10)
-            elif angle > 135 and angle < 225:
-                # Move left
-                self.setRightMotors(self.motorReferenceSpeeds[1] + 10)
-            else:
-                # Move right
-                self.setLeftMotors(self.motorReferenceSpeeds[0] + 10)
+                if angle > 45 and angle < 135:
+                    # Move forward
+                    if self.currentDirection != "Forward":
+                        self.setAllMotors(EQUILIBRIUM_SPEED)
+                        self.currentDirection = "Forward"
+                    self.setBackMotors(EQUILIBRIUM_SPEED + 10)
+                elif angle > 225 and angle < 315:
+                    # Move backward
+                    if self.currentDirection != "Backward":
+                        self.setAllMotors(EQUILIBRIUM_SPEED)
+                        self.currentDirection = "Backward"
+                    self.setFrontMotors(EQUILIBRIUM_SPEED + 10)
+                elif angle > 135 and angle < 225:
+                    # Move left
+                    if self.currentDirection != "Left":
+                        self.setAllMotors(EQUILIBRIUM_SPEED)
+                        self.currentDirection = "Left"
+                    self.setRightMotors(EQUILIBRIUM_SPEED + 10)
+                else:
+                    # Move right
+                    if self.currentDirection != "Right":
+                        self.setAllMotors(EQUILIBRIUM_SPEED)
+                        self.currentDirection = "Right"
+                    self.setLeftMotors(EQUILIBRIUM_SPEED + 10)
 
 # Things to work on
 # Start up sequence -> drone on, calibrate, hover
